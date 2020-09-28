@@ -1,0 +1,16 @@
+{
+    "name": "xy2z/setaliases",
+    "description": "Set windows aliases from a given URL",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "xy2z",
+            "email": "xy2z@pm.me"
+        }
+    ],
+    "require": {},
+    "bin": [
+        "bin/setaliases"
+    ]
+}

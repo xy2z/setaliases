@@ -1,0 +1,54 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Manually runs "alias" command for each line in the content.
+ *
+ */
+
+function tell($var) {
+    echo $var . PHP_EOL;
+}
+
+if (!isset($argv[1])) {
+    exit('Error: Link needed.');
+}
+
+tell('Running...');
+tell('Link: ' . $argv[1]);
+
+$content = file_get_contents($argv[1]);
+
+$separator = "\r\n";
+$lines = explode("\n", $content);
+
+foreach ($lines as $line) {
+    $line = str_replace(["'", "sudo "], "", trim($line));
+    $line = str_replace('&&', '$t', $line);
+
+    if (empty($line)) {
+        // Dont handle empty lines.
+        continue;
+    }
+
+    $alias = str_replace('alias ', '', explode('=', $line)[0]);
+    if (strpos($alias, '..') !== false) {
+        // Skip dots. Because they bug and delete other aliases in Cmder.
+        continue;
+    }
+
+    // Append "$*" if it's not already there.
+    // To allow arguments.
+    // This is only needed on Windows, not linux.
+    if (substr($line, -2) != '$*') {
+        $line .= ' $*';
+    }
+
+
+    // Set new alias
+    passthru($line);
+    // tell('Running: ' . $line)
+
+}
+
+tell('Done.');
