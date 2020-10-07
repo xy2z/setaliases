@@ -14,8 +14,7 @@ if (!isset($argv[1])) {
     exit('Error: Link needed.');
 }
 
-tell('Running...');
-tell('Link: ' . $argv[1]);
+tell('Running setaliases...');
 
 $content = file_get_contents($argv[1]);
 
@@ -37,8 +36,7 @@ foreach ($lines as $line) {
         continue;
     }
 
-    // Append "$*" if it's not already there.
-    // To allow arguments.
+    // Append "$*" if not already there, to allow arguments.
     // This is only needed on Windows, not linux.
     if (substr($line, -2) != '$*') {
         $line .= ' $*';
@@ -47,7 +45,6 @@ foreach ($lines as $line) {
 
     // Set new alias
     passthru($line);
-    // tell('Running: ' . $line)
 
 }
 
