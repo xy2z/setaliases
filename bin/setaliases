@@ -7,14 +7,20 @@
  */
 
 function tell($var) {
-    echo $var . PHP_EOL;
+	echo $var . PHP_EOL;
 }
 
+// Link required
 if (!isset($argv[1])) {
-    tell('Error: Link needed.');
-    exit;
+	tell('Error: Link needed.');
+	exit;
 }
 
+// Only works on Windows
+if (PHP_OS != 'WINNT') {
+	tell('Error: This only works on Windows.');
+	exit;
+}
 
 tell('Running setaliases...');
 
@@ -24,29 +30,29 @@ $separator = "\r\n";
 $lines = explode("\n", $content);
 
 foreach ($lines as $line) {
-    $line = str_replace(["'", "sudo "], "", trim($line));
-    $line = str_replace('&&', '$t', $line);
+	$line = str_replace(["'", "sudo "], "", trim($line));
+	$line = str_replace('&&', '$t', $line);
 
-    if (empty($line)) {
-        // Dont handle empty lines.
-        continue;
-    }
+	if (empty($line)) {
+		// Dont handle empty lines.
+		continue;
+	}
 
-    $alias = str_replace('alias ', '', explode('=', $line)[0]);
-    if (strpos($alias, '..') !== false) {
-        // Skip dots. Because they bug and delete other aliases in Cmder.
-        continue;
-    }
+	$alias = str_replace('alias ', '', explode('=', $line)[0]);
+	if (strpos($alias, '..') !== false) {
+		// Skip dots. Because they bug and delete other aliases in Cmder.
+		continue;
+	}
 
-    // Append "$*" if not already there, to allow arguments.
-    // This is only needed on Windows, not linux.
-    if (substr($line, -2) != '$*') {
-        $line .= ' $*';
-    }
+	// Append "$*" if not already there, to allow arguments.
+	// This is only needed on Windows, not linux.
+	if (substr($line, -2) != '$*') {
+		$line .= ' $*';
+	}
 
 
-    // Set new alias
-    passthru($line);
+	// Set new alias
+	passthru($line);
 
 }
 
