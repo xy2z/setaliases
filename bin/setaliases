@@ -11,8 +11,10 @@ function tell($var) {
 }
 
 if (!isset($argv[1])) {
-    exit('Error: Link needed.');
+    tell('Error: Link needed.');
+    exit;
 }
+
 
 tell('Running setaliases...');
 
