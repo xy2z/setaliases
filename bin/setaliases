@@ -30,7 +30,14 @@ $separator = "\r\n";
 $lines = explode("\n", $content);
 
 foreach ($lines as $line) {
-	$line = str_replace(["'", "sudo "], "", trim($line));
+	$line = trim($line);
+
+	if (substr($line, 0, 5) != 'alias') {
+		tell('not alias: ' . $line);
+		continue;
+	}
+
+	$line = str_replace(["'", "sudo "], "", $line);
 	$line = str_replace('&&', '$t', $line);
 
 	if (empty($line)) {
@@ -50,9 +57,9 @@ foreach ($lines as $line) {
 		$line .= ' $*';
 	}
 
-
 	// Set new alias
-	passthru($line);
+	echo $line . PHP_EOL;
+	// passthru($line);
 
 }
 
