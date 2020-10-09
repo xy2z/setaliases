@@ -8,4 +8,4 @@ This can be used to sync all your aliases from a remote source (eg. Gist) to you
 
 ⚠ This only works for [Cmder](https://cmder.net/) or other windows terminals that uses 'alias' and automatically saves the aliases.
 
-You can read more about this project on my blog here: "LINK COMING SOON"
+You can read more about this project on my blog here: https://xy2z.io/posts/2020-syncing-aliases/
