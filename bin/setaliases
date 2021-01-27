@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+$daily = false;
+
 /**
  * Manually runs "alias" command for each line in the content.
  *
@@ -15,15 +17,47 @@ if (!isset($argv[1])) {
 	exit;
 }
 
+if ($argv[1] === '--daily') {
+	if (!isset($argv[2])) {
+		tell('Error: Link needed.');
+		exit;
+	}
+	$link = $argv[2];
+	$daily = true;
+} else {
+	$link = $argv[1];
+}
+
 // Only works on Windows
 if (PHP_OS != 'WINNT') {
 	tell('Error: This only works on Windows.');
 	exit;
 }
 
+
+$link_filename = sha1($link);
+$today = date('Y-m-d');
+$cache_path = __DIR__ . '/../cache/' . $link_filename;
+
+// Only run once daily if the '--daily' argument is set. Per link.
+if ($daily) {
+	if (file_exists($cache_path)) {
+		$cache_content = file_get_contents($cache_path);
+		if ($cache_content === $today) {
+			// tell('Skipping setaliases, it has aready run today.');
+			exit;
+		}
+	}
+}
+
+// Write to cache.
+file_put_contents($cache_path, $today);
+
+
+
 tell('Running setaliases...');
 
-$content = file_get_contents($argv[1]);
+$content = file_get_contents($link);
 
 $separator = "\r\n";
 $lines = explode("\n", $content);
