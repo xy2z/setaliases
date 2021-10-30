@@ -7,7 +7,7 @@ $daily = false;
  * Manually runs "alias" command for each line in the content.
  *
  */
-function tell($var) {
+function tell(mixed $var) : void {
 	echo $var . PHP_EOL;
 }
 
@@ -35,9 +35,8 @@ if (PHP_OS != 'WINNT') {
 }
 
 
-$link_filename = sha1($link);
 $today = date('Y-m-d');
-$cache_path = __DIR__ . '/../cache/' . $link_filename;
+$cache_path = __DIR__ . '/../cache/' . sha1($link);
 
 // Only run once daily if the '--daily' argument is set. Per link.
 if ($daily) {
@@ -57,7 +56,11 @@ file_put_contents($cache_path, $today);
 
 tell('Running setaliases...');
 
-$content = file_get_contents($link);
+$content = @file_get_contents($link);
+
+if (!$content) {
+	exit('Error: Could not fetch data (typo in the URL?)');
+}
 
 $separator = "\r\n";
 $lines = explode("\n", $content);
@@ -72,6 +75,7 @@ foreach ($lines as $line) {
 
 	$line = str_replace(["'", "sudo "], "", $line);
 	$line = str_replace('&&', '$t', $line);
+	$line = str_replace('|', '$b', $line);
 
 	if (empty($line)) {
 		// Dont handle empty lines.

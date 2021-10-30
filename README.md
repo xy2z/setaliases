@@ -1,8 +1,13 @@
 # Setaliases
 
-Sets your Windows CMDer aliases from a given URL.
+Sets your Windows Cmder aliases from a given URL.
 
-This can be used to sync all your aliases from a remote source (eg. Gist) to your all your devices running Cmder.
+This can be used to sync your aliases from a remote source (eg. Gist) to your all your devices running Cmder.
+
+## Requirements
+- Cmder
+- PHP 7.1 or above (PHP 8 works).
+
 
 ---
 
