@@ -7,7 +7,7 @@ $daily = false;
  * Manually runs "alias" command for each line in the content.
  *
  */
-function tell(mixed $var) : void {
+function tell($var) : void {
 	echo $var . PHP_EOL;
 }
 
