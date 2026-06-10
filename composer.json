@@ -14,6 +14,6 @@
         "bin/setaliases"
     ],
     "require-dev": {
-        "phpstan/phpstan": "^0.12.81"
+        "phpstan/phpstan": "^2.2.2"
     }
 }
