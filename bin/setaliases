@@ -2,25 +2,35 @@
 <?php
 
 $daily = false;
+$time_start = microtime(true);
+$today = date('Y-m-d');
+$cache_dir = __DIR__ . '/../cache';
+define('IN_PROGRESS_PATH', realpath($cache_dir) . '/.in-progress');
 
-/**
- * Manually runs "alias" command for each line in the content.
- *
- */
-function tell(mixed $var) : void {
-	echo $var . PHP_EOL;
+function stop(int $exit_code = 0, ?string $message = null): void {
+	unlink(IN_PROGRESS_PATH);
+	if (!is_null($message)) {
+		echo $message . PHP_EOL;
+	}
+	exit($exit_code);
 }
+
+if (file_exists(IN_PROGRESS_PATH)) {
+	// Already in proggress, probably in another tab.
+	exit(0); // do not use stop() here.
+}
+file_put_contents(IN_PROGRESS_PATH, 1);
+
 
 // Link required
 if (!isset($argv[1])) {
-	tell('Error: Link needed.');
-	exit;
+	stop(1, 'Error: Link needed.');
+	exit; // phpstan...
 }
 
 if ($argv[1] === '--daily') {
 	if (!isset($argv[2])) {
-		tell('Error: Link needed.');
-		exit;
+		stop(1, 'Error: Link needed.');
 	}
 	$link = $argv[2];
 	$daily = true;
@@ -30,39 +40,47 @@ if ($argv[1] === '--daily') {
 
 // Only works on Windows
 if (PHP_OS != 'WINNT') {
-	tell('Error: This only works on Windows.');
-	exit;
+	stop(1, 'Error: This only works on Windows.');
 }
 
 
-$today = date('Y-m-d');
-$cache_path = __DIR__ . '/../cache/' . sha1($link);
+$cache_link_path = $cache_dir . '/' . sha1($link) . '.json';
+$cache_content = [];
 
 // Only run once daily if the '--daily' argument is set. Per link.
-if ($daily) {
-	if (file_exists($cache_path)) {
-		$cache_content = file_get_contents($cache_path);
-		if ($cache_content === $today) {
-			// tell('Skipping setaliases, it has aready run today.');
-			exit;
-		}
+
+if ($daily && file_exists($cache_link_path)) {
+	$cache_content = json_decode(file_get_contents($cache_link_path) ?: '', true);
+
+	if (isset($cache_content['last_run_date']) && ($cache_content['last_run_date'] === $today)) {
+		stop(0);
 	}
 }
 
-// Write to cache.
-file_put_contents($cache_path, $today);
+echo 'Running setaliases...';
+$content = @file_get_contents($link) ?: '';
+$sha1_new_content = sha1($content);
 
 
-
-tell('Running setaliases...');
-
-$content = @file_get_contents($link);
-
-if (!$content) {
-	exit('Error: Could not fetch data (typo in the URL?)');
+// If content hasn't changed since last run, we can exit.
+if (isset($cache_content['sha1_content']) && ($cache_content['sha1_content'] === $sha1_new_content)) {
+	// no changes since last fetch.
+	stop(0, ' Done. [' . round(microtime(true) - $time_start, 2) . 'ms]');
 }
 
-$separator = "\r\n";
+
+// Write to cache.
+file_put_contents($cache_link_path, json_encode([
+	'last_run_date' => $today,
+	'sha1_content' => $sha1_new_content,
+]));
+
+
+if (!$content) {
+	stop(1, 'Error: Could not access URL.');
+}
+
+
 $lines = explode("\n", $content);
 
 foreach ($lines as $line) {
@@ -96,7 +114,7 @@ foreach ($lines as $line) {
 
 	// Run alias command.
 	passthru($line);
-
 }
 
-tell('Done.');
+
+stop(0, ' Done. [' . round(microtime(true) - $time_start, 2) . 'ms]');
